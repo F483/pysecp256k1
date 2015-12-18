@@ -4,9 +4,13 @@ from glob import glob
 import os
 import shutil
 import tarfile
-from cStringIO import StringIO
+from io import BytesIO
 from setuptools import setup, find_packages
-from urllib2 import urlopen, URLError
+try:  # python 2
+    from urllib2 import urlopen, URLError
+except ImportError:  # python 3
+    from urllib.request import urlopen
+    from urllib.error import URLError
 from setuptools.command.sdist import sdist
 from setuptools.command.test import test as TestCommand
 from distutils.command.build_ext import build_ext as distutils_build_ext
@@ -45,7 +49,7 @@ def download_library(command):
         try:
             r = urlopen(TARBALL_URL)
             if r.getcode() == 200:
-                content = StringIO(r.read())
+                content = BytesIO(r.read())
                 content.seek(0)
                 with tarfile.open(fileobj=content) as tf:
                     dirname = tf.getnames()[0].partition('/')[0]
